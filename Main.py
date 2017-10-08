@@ -42,6 +42,9 @@ def getKeywords(text, numOfKeywords):
     rankedWords = scrubList(rankedWords)
     returnDic = {}
 
+    if (numOfKeywords > len(rankedWords)):
+        numOfKeywords = len(rankedWords)
+
     for it in range(0, numOfKeywords):
         temp = rankedWords[it]
         temp = scrubWord(temp) # scrub the word to be stored without changing it's value in the list
