@@ -50,8 +50,7 @@ def getKeywords(text, numOfKeywords):
         temp = scrubWord(temp) # scrub the word to be stored without changing it's value in the list
 
         #add the new, scrubbed word and it's weight
-
-        returnDic[temp] = (wordDic[rankedWords[it]] * (1.0/len(wordDic)))
+        returnDic[temp.encode('UTF8')] = (wordDic[rankedWords[it]] * (1.0/len(wordDic)))
 
     return returnDic
 
@@ -63,4 +62,4 @@ art = Article(url, language='en')  # English
 art.download()
 art.parse()
 
-print(getKeywords(art.text, 15))
+print(getKeywords(art.text, 10))
