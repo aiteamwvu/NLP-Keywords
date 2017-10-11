@@ -54,12 +54,15 @@ def getKeywords(text, numOfKeywords):
 
     return returnDic
 
-
-url = 'https://techcrunch.com/2017/10/06/apple-is-looking-into-reports-of-iphone-8-batteries-swelling/'
-
-# newspaper
-art = Article(url, language='en')  # English
-art.download()
-art.parse()
-
-print(getKeywords(art.text, 10))
+if __name__ == '__main__':
+   url = 'https://techcrunch.com/2017/10/06/apple-is-looking-into-reports-of-iphone-8-batteries-swelling/'
+   
+   # newspaper
+   art = Article(url, language='en')  # English
+   art.download()
+   art.parse()
+   print(getKeywords(art.text, 10))
+   art.nlp();
+   
+   #note art.keywords, art.title
+   print(art.keywords);
