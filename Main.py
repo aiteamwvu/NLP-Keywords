@@ -54,6 +54,7 @@ def getKeywords(text, numOfKeywords):
 
     return returnDic
 
+<<<<<<< Updated upstream
 #test case (Don't forget to uncomment newspaper import)
 #url = 'https://techcrunch.com/2017/10/06/apple-is-looking-into-reports-of-iphone-8-batteries-swelling/'
 
@@ -63,3 +64,14 @@ def getKeywords(text, numOfKeywords):
 #art.parse()
 
 #print(getKeywords(art.text, 10))
+=======
+
+url = 'https://techcrunch.com/2017/10/06/apple-is-looking-into-reports-of-iphone-8-batteries-swelling/'
+
+# newspaper
+art = Article(url, language='en')  # English
+art.download()
+art.parse()
+
+print(getKeywords(art.text, 10))
+>>>>>>> Stashed changes
