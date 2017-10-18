@@ -1,34 +1,29 @@
 from newspaper import Article
 from neo4j.v1 import GraphDatabase, basic_auth
 
-driver = GraphDatabase.driver("bolt://localhost:7687", auth=basic_auth("neo4j", "example"))
+driver = GraphDatabase.driver("http://aiwvu.ml:7474", auth=basic_auth("neo4j", "edupassword"))
 session = driver.session()
 
-def batchKeys(driver):
-   result = driver.session().run("match (a:Article {processed : false}) RETURN a.url AS url")
+def batchKeys():
+   result = driver.session().run("match (a:Article {keywordProcessed : false}) RETURN a.link AS url LIMIT 10")
    for record in result:
-      process(driver, record['url'])
+      processKeys(record['url'])
 
-def processKeys(driver, url):
+def processKeys(url):
    try:
-      print(url)
       art = Article(url)
       art.download()
       art.parse()
       art.nlp() #need to use custom keyword extractor here
-      request = "MATCH (a:Article { url : $url } ) SET a.processed = true SET a.name = $title FOREACH ( key IN $keywords | MERGE (b:Keyword {name : key} ) MERGE (a)-[:Has]->(b) )"
-      url.replace("'", "\\'")
-      art.title = art.title.replace("'", "\\'")
-      art.keywords = list(map(lambda x: x.replace("'", "\\'") , art.keywords))
-      request = request.replace('$url', "'" + url + "'")
-      request = request.replace('$keywords', str(art.keywords))
-      request = request.replace('$title', "'" + art.title + "'")
-      driver.session().run(request)
+      request = "MATCH (a:Article { link : '{url}' } ) SET a.keywordProcessed = true FOREACH ( key IN {keywords} | MERGE (a)-[:Has]->(:Keyword {name : key}) )"
+      driver.session().run(request, keywords=art.keywords, url=url)
+      print('ding!')
    except Exception as err:
       print("Error")
       print(err)
-      print(url)            
-      
+      print(url)   
+      print("")     
+
 def dbAdd(url):
    art = Article(url)
    art.download()
@@ -45,11 +40,6 @@ def dbAdd(url):
    
 if __name__ == '__main__':
    batchKeys(driver)
-   while True:
-      try:
-         dbAdd( input("Url>"))
-      except EOFError:
-         break;
    
    
      
