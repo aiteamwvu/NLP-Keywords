@@ -40,11 +40,6 @@ def dbAdd(url):
    
 if __name__ == '__main__':
    batchKeys(driver)
-   while True:
-      try:
-         dbAdd( input("Url>"))
-      except EOFError:
-         break;
    
    
      
