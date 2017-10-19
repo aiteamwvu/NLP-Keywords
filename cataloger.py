@@ -1,22 +1,29 @@
 from newspaper import Article
 from neo4j.v1 import GraphDatabase, basic_auth
 
-driver = GraphDatabase.driver("http://aiwvu.ml:7474", auth=basic_auth("neo4j", "edupassword"))
+driver = GraphDatabase.driver("bolt://aiwvu.ml", auth=basic_auth("neo4j", "edupassword"))
+
+
 session = driver.session()
 
 def batchKeys():
-   result = driver.session().run("match (a:Article {keywordProcessed : false}) RETURN a.link AS url LIMIT 10")
+   result = driver.session().run("match (a:Article {keywordProcessed : false}) WHERE a.source_content <> 'video' RETURN a.link AS url LIMIT 20")
    for record in result:
       processKeys(record['url'])
 
 def processKeys(url):
    try:
+      print(url)
       art = Article(url)
       art.download()
       art.parse()
       art.nlp() #need to use custom keyword extractor here
-      request = "MATCH (a:Article { link : '{url}' } ) SET a.keywordProcessed = true FOREACH ( key IN {keywords} | MERGE (a)-[:Has]->(:Keyword {name : key}) )"
-      driver.session().run(request, keywords=art.keywords, url=url)
+      print('keys' + str(art.keywords))
+      request = "MATCH (a:Article { link : '{url}' } ) SET a.keywordProcessed = true FOREACH ( key IN {keywords} | MERGE (b:Keyword {name : key})  MERGE (a)-[:Has]->(b) )"
+      request = request.replace('{url}', url)
+      request = request.replace("{keywords}", str(art.keywords))
+      print(request)        
+      driver.session().run(request)
       print('ding!')
    except Exception as err:
       print("Error")
@@ -39,7 +46,7 @@ def dbAdd(url):
 
    
 if __name__ == '__main__':
-   batchKeys(driver)
+   batchKeys()
    
    
      
