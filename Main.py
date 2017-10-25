@@ -11,14 +11,11 @@ def getKeywords(text, numOfKeywords, title=""):
     # parameters are as follows:
     # words (list of strings: words to scrub of junk data and irrelevant data)
     def scrubList(words):
-
-        invalidWords = []
-
         i = 0
         while (i < len(words)):
             # remove everything that's invalid
             # currently it will remove: unicode codes, specified strings in the invalidWords list
-            if ('\u' in words[i].encode('raw_unicode_escape') or words[i] in invalidWords):
+            if ('\u' in words[i].encode('raw_unicode_escape')):
                 del words[i]
             else:  # otherwise increment iteration
                 i += 1
