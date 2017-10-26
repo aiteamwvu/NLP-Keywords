@@ -47,12 +47,12 @@ def getKeywords(text, numOfKeywords, title=""):
     if (numOfKeywords > len(rankedWords)):
         numOfKeywords = len(rankedWords)
 
-    for it in range(0, numOfKeywords):
+    for it in rankedWords[0:numOfKeywords]:
         temp = rankedWords[it]
         temp = scrubWord(temp) # scrub the word to be stored without changing it's value in the list
 
         # add the new, scrubbed word and it's weight
-        returnDic[temp.encode('UTF8')] = (wordDic[rankedWords[it]] * (1.0/len(wordDic)))
+        returnDic[temp.encode('UTF8')] = (wordDic[rankedWords[it]] * (1.0/numOfKeyWords))
 
     return returnDic
 
