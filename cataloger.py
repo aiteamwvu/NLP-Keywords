@@ -1,11 +1,11 @@
 from newspaper import Article
 from neo4j.v1 import GraphDatabase, basic_auth
 
-driver = GraphDatabase.driver("http://aiwvu.ml:7474", auth=basic_auth("neo4j", "edupassword"))
-session = driver.session()
+driver = GraphDatabase.driver("botl://aiwvu.ml:7687", auth=basic_auth("neo4j", "edupassword"))
+
 
 def batchKeys():
-   result = driver.session().run("match (a:Article {keywordProcessed : false}) RETURN a.link AS url LIMIT 10")
+   result = driver.session().run("match (a:Article {keywordProcessed : false}) RETURN a.link AS url")
    for record in result:
       processKeys(record['url'])
 
@@ -24,6 +24,15 @@ def processKeys(url):
       print(url)   
       print("")     
 
+def dbAdd(url, keyDict, labels=dict()):
+   #untested, but hopeful
+   drive.session().run( \
+   "MERGE (a:Article { link : $url } )\n" + \
+   "SET a.keywordTime = timestamp()\n" + \
+   "FOREACH ( key in $keyDict | MERGE (a)--[:Has]->(b:Keyword { name : key } ) SET b.value = $keyDict.key )" + \
+   "FOREACH (label in $labels | SET a.label = $labels.label )", \
+   keyDict=keyDict, labels=labels, url=url)
+
 def dbAdd(url):
    art = Article(url)
    art.download()
@@ -36,7 +45,16 @@ def dbAdd(url):
       request += "SET a.name = '" + url + "' "
    driver.session().run(request, url=url , keywords=art.keywords)
 
-
+def dbSearch(searchString):
+   keywords = searchString.split(" ")
+   result = drive.session().run( \
+   "MATCH (b:Keyword)" + \
+   "WHERE b.name in $keywords" + \
+   "WITH b" + \
+   "MATCH (a:Article)-[h:Has]->(b)" + \
+   "WITH a, sum(h.value) AS rank" + \
+   "return a ORDER BY rank DESC", \
+   keywords=keywords
    
 if __name__ == '__main__':
    batchKeys(driver)
