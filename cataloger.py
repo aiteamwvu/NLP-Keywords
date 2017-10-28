@@ -26,19 +26,19 @@ def dbAdd(url, keyDict=None):
    driver.session().run( \
    "MERGE (a:Article { link : $url } )\n" + \
    "SET a.keywordTime = timestamp()\n" + \
-   "FOREACH ( key in keys($keyDict) | MERGE (a)-[:Has {certainty: $keyDict[key]} ]->(:Keyword {name : key})) "   \
+   "FOREACH ( key in keys($keyDict) | MERGE (k:Keyword {name : key}) MERGE (a)-[h:Has]->(k) SET h.certainty = $keyDict[key])"   \
    , keyDict=keyDict, url=url)
 
 
 def dbSearch(searchString):
    keywords = searchString.split(" ")
-   result = drive.session().run( \
-   "MATCH (b:Keyword)" + \
-   "WHERE b.name in $keywords" + \
-   "WITH b" + \
-   "MATCH (a:Article)-[h:Has]->(b)" + \
-   "WITH a, sum(h.certainty) AS rank" + \
-   "return a ORDER BY rank DESC", \
+   print(keywords)
+   result = driver.session().run( \
+   "MATCH (b:Keyword)\n" + \
+   "WHERE b.name in $keywords\n" + \
+   "MATCH (a:Article)-[h:Has]->(b)\n" + \
+   "WITH a, sum(h.certainty) AS rank\n" + \
+   "return a ORDER BY rank DESC\n", \
    keywords=keywords)
 
 if __name__ == '__main__':
