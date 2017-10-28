@@ -1,7 +1,9 @@
 from newspaper import Article
 from neo4j.v1 import GraphDatabase, basic_auth
 
-driver = GraphDatabase.driver("botl://aiwvu.ml:7687", auth=basic_auth("neo4j", "edupassword"))
+import Main3
+
+driver = GraphDatabase.driver("bolt://35.197.88.141:7687", auth=basic_auth("neo4j", "edupassword"))
 
 
 def batchKeys():
@@ -24,26 +26,22 @@ def processKeys(url):
       print(url)   
       print("")     
 
-def dbAdd(url, keyDict, labels=dict()):
+def dbAdd(url, keyDict=None, labels=dict()):
+   if keyDict==None:
+      art = Article(url)
+      art = Article(url, language='en')  # English
+      art.download()
+      art.parse()
+      keyDict = Main3.getKeywords(art.text, 10)
+      labels['title'] = art.title
    #untested, but hopeful
-   drive.session().run( \
+   driver.session().run( \
    "MERGE (a:Article { link : $url } )\n" + \
    "SET a.keywordTime = timestamp()\n" + \
    "FOREACH ( key in $keyDict | MERGE (a)--[:Has]->(b:Keyword { name : key } ) SET b.value = $keyDict.key )" + \
    "FOREACH (label in $labels | SET a.label = $labels.label )", \
    keyDict=keyDict, labels=labels, url=url)
 
-def dbAdd(url):
-   art = Article(url)
-   art.download()
-   art.parse()
-   art.nlp()
-   request = "Create (a:Article { url : '{url}' } ) SET a.processed = true FOREACH ( key IN {keywords} | MERGE (b:Keyword {name : key} ) MERGE (a)-[:Has]->(b) )"
-   if art.title : 
-      request += "SET a.name = '" + art.title.replace("'", "\\'") + "' "
-   else :
-      request += "SET a.name = '" + url + "' "
-   driver.session().run(request, url=url , keywords=art.keywords)
 
 def dbSearch(searchString):
    keywords = searchString.split(" ")
@@ -54,10 +52,10 @@ def dbSearch(searchString):
    "MATCH (a:Article)-[h:Has]->(b)" + \
    "WITH a, sum(h.value) AS rank" + \
    "return a ORDER BY rank DESC", \
-   keywords=keywords
-   
+   keywords=keywords)
+
 if __name__ == '__main__':
-   batchKeys(driver)
+   dbAdd('https://techcrunch.com/2017/10/06/apple-is-looking-into-reports-of-iphone-8-batteries-swelling/')
    
    
      
