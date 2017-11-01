@@ -30,3 +30,24 @@ The words are the key to find weights.
 
 ------------------
 NOTE: if numOfKeywords is higher than the number of keywords available, it will return everything it can.
+
+
+------------------
+install keyWordRating:
+
+Using your favorite flavor of pip, install neo4j-driver
+
+Modding:
+
+If you want to rate keywords indefinitely, delete 'LIMIT X' from the query.
+
+Rating guide:
+1 Bad/generic keyword
+2 normal keyword
+3 good/descriptive/useful keyword
+
+Don't sweat it too much if you feel like you made a mistake. You can always go to 
+35.197.88.141:7474
+
+to override an old rating. edupassword is the password. 
+

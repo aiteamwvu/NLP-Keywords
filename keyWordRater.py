@@ -5,7 +5,7 @@ driver = GraphDatabase.driver("bolt://35.197.88.141:7687", auth=basic_auth("neo4
 
 
 def rateSomeKeys():
-   result = driver.session().run("match (k:Keyword) WHERE not 'rating' in keys(k) RETURN a.name AS name LIMIT 10")
+   result = driver.session().run("match (k:Keyword) WHERE not 'rating' in keys(k) RETURN k.name AS name LIMIT 10")
    for entry in result:
       keyname = entry['name']
       rating = input( keyname + ' rating?')
@@ -13,5 +13,5 @@ def rateSomeKeys():
    
 
 
-if __name__ is "__main__":
+if __name__ == "__main__":
    rateSomeKeys()
