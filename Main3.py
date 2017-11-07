@@ -5,7 +5,7 @@ from rake_nltk import Rake
 # text (string: text to obtain keywords from)
 # numOfKeywords (integer: how many keywords to obtain from text)
 # title (string: the title of the text if applicable(if left empty it won't be used))
-def getKeywords(text, numOfKeywords, title=""):
+def getKeywords(text, numOfKeywords=-1, title=""):
 
     # remove words which are not valid keywords or are not useful
     # parameters are as follows:
@@ -54,7 +54,7 @@ def getKeywords(text, numOfKeywords, title=""):
     rankedWords = scrubList(rankedWords)
     returnDic = {}
 
-    if (numOfKeywords > len(rankedWords)):
+    if (numOfKeywords > len(rankedWords)) or numOfKeywords == -1:
         numOfKeywords = len(rankedWords)
 
     for it in range(0, numOfKeywords):

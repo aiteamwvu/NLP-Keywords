@@ -9,7 +9,7 @@ driver = GraphDatabase.driver("bolt://35.197.88.141:7687", auth=basic_auth("neo4
 def batchKeys():
    result = []
    with driver.session() as session:
-      result = session.run("match (a:Article) WHERE NOT exists(a.keywordTime) RETURN a.link AS url")
+      result = session.run("match (a:Article) WHERE a.keywordTime < 1510029963408  RETURN a.link AS url")
    for record in result:
       print(record)
       try:
@@ -32,10 +32,12 @@ def dbAdd(url, keyDict=None):
       art = Article(url, language='en')  # English
       art.download()
       art.parse()
-      keyDict = Main3.getKeywords(art.text, 20)
+      art.nlp()
+      keyDict = Main3.getKeywords(art.text)
       #print(keyDict)
       keyDict = dict( [ (key.decode('ascii'), value) for key, value in keyDict.items() ])
-      #print(keyDict)
+      newsSet = art.keywords
+      keyDict = { x : y for x, y  in keyDict.items() if x in newsSet }
    #tested, now more than hopeful
    with driver.session() as session:
       session.run( \
