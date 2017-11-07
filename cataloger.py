@@ -1,4 +1,4 @@
-from newspaper import Article
+from newspaper import Article, ArticleException
 from neo4j.v1 import GraphDatabase, basic_auth
 
 import Main3
@@ -7,14 +7,28 @@ driver = GraphDatabase.driver("bolt://35.197.88.141:7687", auth=basic_auth("neo4
 
 
 def batchKeys():
-   result = driver.session().run("match (a:Article) WHERE NOT exists(a.keywordTime) RETURN a.link AS url LIMIT 3")
+   result = []
+   with driver.session() as session:
+      result = session.run("match (a:Article) WHERE NOT exists(a.keywordTime) RETURN a.link AS url")
    for record in result:
-      dbAdd(record['url'])
+      print(record)
+      try:
+         dbAdd(record['url'])
+      except UnicodeDecodeError:
+          print('Unicode Error')
+          with driver.session() as session:
+             session.run("match (a:Article { link : $url } ) detach delete a", url=record['url'])
+      except ArticleException:
+          print('Article Exception')
+          with driver.session() as session:
+             session.run("match (a:Article {link : $url } ) detach delete a", url=record['url'])
+          
+      
+   
 
 
 def dbAdd(url, keyDict=None):
    if keyDict==None:
-      art = Article(url)
       art = Article(url, language='en')  # English
       art.download()
       art.parse()
@@ -23,11 +37,12 @@ def dbAdd(url, keyDict=None):
       keyDict = dict( [ (key.decode('ascii'), value) for key, value in keyDict.items() ])
       #print(keyDict)
    #tested, now more than hopeful
-   driver.session().run( \
-   "MERGE (a:Article { link : $url } )\n" + \
-   "SET a.keywordTime = timestamp()\n" + \
-   "FOREACH ( key in keys($keyDict) | MERGE (k:Keyword {name : key}) MERGE (a)-[h:Has]->(k) SET h.certainty = $keyDict[key])"   \
-   , keyDict=keyDict, url=url)
+   with driver.session() as session:
+      session.run( \
+      "MERGE (a:Article { link : $url } )\n" + \
+      "SET a.keywordTime = timestamp()\n" + \
+      "FOREACH ( key in keys($keyDict) | MERGE (k:Keyword {name : key}) MERGE (a)-[h:Has]->(k) SET h.certainty = $keyDict[key])"   \
+      , keyDict=keyDict, url=url)
 
 
 def dbSearch(searchString):
