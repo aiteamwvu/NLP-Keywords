@@ -1,4 +1,25 @@
 # NLP-Keywords
+
+## Contents
+
+* Main and Main3
+
+Modules for extracting keywords from text documents, presumably from Newspaper
+
+* cataloger
+
+Utility for forming a semantic network. Adds specified articles
+to the neo4j database, along with keywords and related nodes.
+
+
+* keyWordRater
+
+Utility for rating keywords to create training data.
+
+
+##Main and Main3
+
+
 Keyword extraction from text
 
 To Run with Python 2:
@@ -33,8 +54,32 @@ NOTE: if numOfKeywords is higher than the number of keywords available, it will 
 
 
 ------------------
-install keyWordRating:
 
+
+
+##cataloger
+
+###API
+
+* batchKeys()
+ * Adds keywords to unlabled articles in the neo4j database. No Return.
+ * Deletes articles with broken links.
+ * Bug: If a video or other non-text media is labeled as an Article, it gets deleted rather than relabeled. 
+
+
+* dbAdd(url, keyDict=None)
+  * Adds the keywords to the article corresponding to the url
+  * If the article doesn't exist, creates one.
+  * keyDict - A dictionary of keywords and their corresponding certainty
+    * Each key should be a string, and each value should be a number
+    * By default, populated using Main3's keyword algorithm
+  * Throws ArticleException and UnicodeDecodeErrror based off of keyword and article content
+
+* dbSearch(searchString)
+  * Returns articles whose keywords appear in the search string
+  * See neo4j bolt format for articles structure
+
+## keyWordRater
 Using your favorite flavor of pip, install neo4j-driver
 
 Modding:
